@@ -12,24 +12,27 @@ class TaxonomySpec extends WordSpecLike with Matchers {
   )
   val musicSubForest = music.subForest
 
+  val restaurantTag: Tag = Tag("restaurant", Map("en_GB" -> "Restaurants", "fr_FR" -> "Restaurants", "es_ES" -> "Restaurantes"))
+  val chineseTag: Tag = Tag("chinese", Map("en_GB" -> "Chinese", "fr_FR" -> "Chinois", "it_IT" -> "Cinese"))
+
   val comedyShow = Category("comedy").leaf
 
   val frenchRestaurant = Category("french").leaf
-  val chineseRestaurant = Category("chinese").leaf
+  val chineseRestaurant = Category("chinese", List(chineseTag)).leaf
   val italianRestaurant = Category("italian").leaf
-
-  val restaurantTag: Tag = Tag("restaurant")
 
   val restaurantsCategory = Category("restaurants", List(restaurantTag)).node(
     chineseRestaurant,
     frenchRestaurant,
     italianRestaurant
   )
+  val chineseFilms = Category("chinese", List(chineseTag)).leaf
+
   val categoryTaxonomy = Taxonomy(Category("categories").node(
     Category("shows").node(
       Category("theatre").leaf,
       Category("films").node(
-        Category("chinese").leaf,
+        chineseFilms,
         comedyShow,
         Category("action").leaf
       )
@@ -71,6 +74,13 @@ class TaxonomySpec extends WordSpecLike with Matchers {
       taggedCategories should contain(chineseRestaurant.rootLabel)
       taggedCategories should contain(italianRestaurant.rootLabel)
       taggedCategories should contain(frenchRestaurant.rootLabel)
+    }
+
+    "return tagged categories under different paths" in {
+      val taggedCategories = categoryTaxonomy.findByTag(chineseTag)
+
+      taggedCategories should contain(chineseRestaurant.rootLabel)
+      taggedCategories should contain(chineseFilms.rootLabel)
     }
   }
 }
