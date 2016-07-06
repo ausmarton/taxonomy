@@ -11,9 +11,20 @@ class TaxonomySpec extends WordSpecLike with Matchers {
     Category("rock").leaf
   )
   val musicSubForest = music.subForest
-  private val comedyShow = Category("comedy").leaf
-  private val frenchRestaurant = Category("french").leaf
 
+  val comedyShow = Category("comedy").leaf
+
+  val frenchRestaurant = Category("french").leaf
+  val chineseRestaurant = Category("chinese").leaf
+  val italianRestaurant = Category("italian").leaf
+
+  val restaurantTag: Tag = Tag("restaurant")
+
+  val restaurantsCategory = Category("restaurants", List(restaurantTag)).node(
+    chineseRestaurant,
+    frenchRestaurant,
+    italianRestaurant
+  )
   val categoryTaxonomy = Taxonomy(Category("categories").node(
     Category("shows").node(
       Category("theatre").leaf,
@@ -24,11 +35,7 @@ class TaxonomySpec extends WordSpecLike with Matchers {
       )
     ),
     music,
-    Category("restaurants").node(
-      Category("chinese").leaf,
-      frenchRestaurant,
-      Category("italian").leaf
-    )
+    restaurantsCategory
   ))
 
   "Taxonomy::findById" should {
@@ -53,6 +60,17 @@ class TaxonomySpec extends WordSpecLike with Matchers {
 
     "return descendants for nodes" in {
       categoryTaxonomy.findDescendants(music.rootLabel) shouldBe musicSubForest
+    }
+  }
+
+  "Taxonomy::findByTag" should {
+    "return tagged categories" in {
+      val taggedCategories = categoryTaxonomy.findByTag(restaurantTag)
+
+      taggedCategories should contain(restaurantsCategory.rootLabel)
+      taggedCategories should contain(chineseRestaurant.rootLabel)
+      taggedCategories should contain(italianRestaurant.rootLabel)
+      taggedCategories should contain(frenchRestaurant.rootLabel)
     }
   }
 }

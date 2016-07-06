@@ -2,17 +2,21 @@ package ausmarton.taxonomy
 
 import scalaz.Tree
 
-case class Category(name: String)
+case class Category(name: String, tags: Seq[Tag] = Nil)
+case class Tag(name: String)
 
 case class Taxonomy(categories: Tree[Category]) {
-  private def findRecursively(t: Tree[Category], c: Category): Stream[Tree[Category]] = {
-    if (t.rootLabel == c) t.subForest
-    else t.subForest.flatMap(findRecursively(_, c))
-  }
 
   def findById(name: String) = categories.flatten.find(_.name == name)
 
-  def findDescendants(c: Category): Stream[Tree[Category]] = {
-    findRecursively(categories: Tree[Category], c)
+  def findDescendants(category: Category, tree: Tree[Category] = categories): Stream[Tree[Category]] =
+    if (tree.rootLabel == category) tree.subForest
+    else tree.subForest.flatMap(findDescendants(category,_))
+
+  def findByTag(tag: Tag): Stream[Category] = {
+    val taggedCategories = categories.flatten.filter(_.tags.contains(tag))
+    taggedCategories
+      .flatMap(findDescendants(_)
+      .flatMap(_.flatten)) #::: taggedCategories
   }
 }
