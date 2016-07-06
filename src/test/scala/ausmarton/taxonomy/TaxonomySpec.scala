@@ -5,51 +5,54 @@ import scalaz.Scalaz._
 import scalaz.Tree
 
 class TaxonomySpec extends WordSpecLike with Matchers {
-  val music = "music".node(
-    "jazz".leaf,
-    "pop".leaf,
-    "rock".leaf
+  val music = Category("music").node(
+    Category("jazz").leaf,
+    Category("pop").leaf,
+    Category("rock").leaf
   )
   val musicSubForest = music.subForest
-  val categoryTaxonomy = Taxonomy("categories".node(
-    "shows".node(
-      "theatre".leaf,
-      "films".node(
-        "chinese".leaf,
-        "comedy".leaf,
-        "action".leaf
+  private val comedyShow = Category("comedy").leaf
+  private val frenchRestaurant = Category("french").leaf
+
+  val categoryTaxonomy = Taxonomy(Category("categories").node(
+    Category("shows").node(
+      Category("theatre").leaf,
+      Category("films").node(
+        Category("chinese").leaf,
+        comedyShow,
+        Category("action").leaf
       )
     ),
     music,
-    "restaurants".node(
-      "chinese".leaf,
-      "french".leaf,
-      "italian".leaf
+    Category("restaurants").node(
+      Category("chinese").leaf,
+      frenchRestaurant,
+      Category("italian").leaf
     )
   ))
 
   "Taxonomy::findById" should {
     "return None for non-existent ids" in {
-      Taxonomy("comedy".leaf).findById("non-existent") shouldBe None
+      Taxonomy(comedyShow).findById("non-existent") shouldBe None
     }
 
     "return Node for id with one node if present" in {
-      Taxonomy("comedy".leaf).findById("comedy") shouldBe Some("comedy")
+      Taxonomy(comedyShow).findById("comedy") shouldBe Some(comedyShow.rootLabel)
     }
 
     "return Node for id when present" in {
-      categoryTaxonomy.findById("french") shouldBe Some("french")
-      categoryTaxonomy.findById("music") shouldBe Some("music")
+      categoryTaxonomy.findById("french") shouldBe Some(frenchRestaurant.rootLabel)
+      categoryTaxonomy.findById("music") shouldBe Some(music.rootLabel)
     }
   }
 
   "Taxonomy::findDescendants" should {
     "return no descendants for leaf nodes" in {
-      categoryTaxonomy.findDescendants("italian") shouldBe Stream[Tree[String]]()
+      categoryTaxonomy.findDescendants(comedyShow.rootLabel) shouldBe Stream[Tree[Category]]()
     }
 
     "return descendants for nodes" in {
-      categoryTaxonomy.findDescendants("music") shouldBe musicSubForest
+      categoryTaxonomy.findDescendants(music.rootLabel) shouldBe musicSubForest
     }
   }
 }
