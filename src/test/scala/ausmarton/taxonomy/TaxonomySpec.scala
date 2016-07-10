@@ -1,6 +1,7 @@
 package ausmarton.taxonomy
 
 import org.scalatest.{Matchers, WordSpecLike}
+
 import scalaz.Scalaz._
 import scalaz.Tree
 
@@ -47,12 +48,12 @@ class TaxonomySpec extends WordSpecLike with Matchers {
     }
 
     "return Node for id with one node if present" in {
-      Taxonomy(comedyShow).findById("comedy") shouldBe Some(comedyShow.rootLabel)
+      Taxonomy(comedyShow).findById("comedy") shouldBe Some(comedyShow)
     }
 
     "return Node for id when present" in {
-      categoryTaxonomy.findById("french") shouldBe Some(frenchRestaurant.rootLabel)
-      categoryTaxonomy.findById("music") shouldBe Some(music.rootLabel)
+      categoryTaxonomy.findById("french") shouldBe Some(frenchRestaurant)
+      categoryTaxonomy.findById("music") shouldBe Some(music)
     }
   }
 
